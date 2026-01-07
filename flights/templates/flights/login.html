@@ -1,0 +1,12 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}ورود{% endblock %}
+
+{% block content %}
+    <h1 class="text-center my-4">ورود به سیستم</h1>
+    <form method="post" class="w-50 mx-auto">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success w-100">ورود</button>
+    </form>
+{% endblock %}

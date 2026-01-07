@@ -1,0 +1,26 @@
+
+{% extends 'flights/base.html' %}
+
+{% block title %}ثبت‌نام{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow mt-5">
+            <div class="card-header bg-primary text-white text-center">
+                <h3>ثبت‌نام کاربر جدید</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-success w-100 mt-3">ثبت‌نام</button>
+                </form>
+                <p class="text-center mt-4">
+                    قبلاً حساب دارید؟ <a href="{% url 'login' %}">وارد شوید</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

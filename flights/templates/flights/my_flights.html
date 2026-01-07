@@ -1,0 +1,12 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}پروازهای من{% endblock %}
+
+{% block content %}
+    <h1 class="text-center my-4">پروازهای ثبت‌شده من</h1>
+    <ul class="list-group">
+        {% for flight in flights %}
+            <li class="list-group-item">{{ flight }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
