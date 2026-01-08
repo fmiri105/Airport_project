@@ -4,28 +4,104 @@
 
 {% block content %}
     <h1 class="text-center my-4">لیست پروازها</h1>
-    <table class="table table-striped table-hover">
+
+    <table class="table table-striped table-hover align-middle">
         <thead class="table-dark">
             <tr>
                 <th>مبدا</th>
                 <th>مقصد</th>
                 <th>فاصله (km)</th>
-                {% if user.is_authenticated %}
-                    <th>عملیات</th>
-                {% endif %}
+                <th class="text-center">عملیات</th>
             </tr>
         </thead>
         <tbody>
             {% for flight in flights %}
                 <tr>
-                    <td>{{ flight.origin_airport }}</td>
-                    <td>{{ flight.destination_airport }}</td>
+                    <td><strong>{{ flight.origin_airport }}</strong></td>
+                    <td><strong>{{ flight.destination_airport }}</strong></td>
                     <td>{{ flight.distance }}</td>
-                    {% if user.is_authenticated %}
-                        <td><a href="{% url 'register_flight' flight.id %}" class="btn btn-primary btn-sm">ثبت پرواز</a></td>
-                    {% endif %}
+                    <td class="text-center">
+                        <!-- ثبت پرواز -->
+                        <a href="/register_flight/{{ flight.id }}/" 
+                           class="btn btn-success btn-sm me-2" 
+                           id="registerBtn{{ flight.id }}" 
+                           style="display: none;">
+                            ثبت پرواز
+                        </a>
+
+                        <!-- مشاهده مسافران -->
+                        <a href="/flight/{{ flight.id }}/passengers/" 
+                           class="btn btn-info btn-sm" 
+                           id="passengersBtn{{ flight.id }}" 
+                           style="display: none;">
+                            مشاهده مسافران
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        هیچ پروازی یافت نشد.
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="text-center mt-4">
+        <a href="/my_flights/" class="btn btn-outline-primary" id="myFlightsBottomBtn" style="display: none;">
+            پروازهای من
+        </a>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        console.log('کاربر لاگین نیست');
+        return;
+    }
+
+    // همه کاربران لاگین‌شده: دکمه ثبت پرواز و پروازهای من
+    document.querySelectorAll('[id^="registerBtn"]').forEach(btn => {
+        btn.style.display = 'inline-block';
+    });
+
+    const myFlightsBtn = document.getElementById('myFlightsBottomBtn');
+    if (myFlightsBtn) myFlightsBtn.style.display = 'inline-block';
+
+    // گرفتن اطلاعات کاربر
+    fetch('/api/user/', {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('توکن نامعتبر');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('اطلاعات کاربر دریافت شد:', data);
+
+        // اگر ادمین باشه یا در گروه Flight Managers باشه
+        if (data.is_staff || (data.groups && data.groups.includes('Flight Managers'))) {
+            console.log('کاربر مجوز مشاهده مسافران دارد');
+            document.querySelectorAll('[id^="passengersBtn"]').forEach(btn => {
+                btn.style.display = 'inline-block';
+            });
+        } else {
+            console.log('کاربر مجوز ندارد');
+        }
+    })
+    .catch(err => {
+        console.error('خطا در گرفتن اطلاعات کاربر:', err);
+        // اختیاری: لاگ‌اوت اتوماتیک
+        // localStorage.clear();
+        // window.location.href = '/login/';
+    });
+});
+</script>
 {% endblock %}

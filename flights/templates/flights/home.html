@@ -1,0 +1,79 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}صفحه اصلی - سیستم رزرو پرواز{% endblock %}
+
+{% block content %}
+<div class="text-center py-5 my-5">
+    <h1 class="display-4 mb-4 fw-bold">✈️ خوش آمدید به سیستم رزرو پرواز</h1>
+    <p class="lead mb-5 text-muted">
+        اینجا می‌توانید پروازهای موجود را مشاهده کنید و بلیط خود را رزرو نمایید.
+    </p>
+
+    <div class="d-flex flex-column flex-md-row gap-3 justify-content-center align-items-center">
+        <a href="/flights/" class="btn btn-primary btn-lg px-5 py-3">
+            مشاهده لیست پروازها
+        </a>
+
+        <!-- این بخش‌ها با JavaScript در base.html مدیریت می‌شن -->
+        <!-- دیگر نیازی به شرط user.is_authenticated نیست -->
+        <!-- همه چیز در navbar و با localStorage کنترل می‌شه -->
+
+        <a href="/my_flights/" class="btn btn-success btn-lg px-5 py-3" id="myFlightsBtn" style="display: none;">
+            پروازهای من
+        </a>
+
+        <button id="logoutBtnHome" class="btn btn-outline-secondary btn-lg px-5 py-3" style="display: none;">
+            خروج
+        </button>
+
+        <a href="/login/" class="btn btn-outline-primary btn-lg px-5 py-3" id="loginBtn">
+            ورود به حساب
+        </a>
+
+        <a href="/register/" class="btn btn-outline-info btn-lg px-5 py-3" id="registerBtn">
+            ثبت‌نام
+        </a>
+    </div>
+
+    <div class="mt-5">
+        <p class="text-muted">
+            {% now "Y" %} © سیستم مدیریت پروازها - ساخته شده با Django
+        </p>
+    </div>
+</div>
+
+<script>
+// همین اسکریپت navbar رو اینجا هم تکرار می‌کنیم تا دکمه‌های صفحه اصلی هم به‌روز بشن
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('access_token');
+    const username = localStorage.getItem('username');
+
+    const myFlightsBtn = document.getElementById('myFlightsBtn');
+    const logoutBtnHome = document.getElementById('logoutBtnHome');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+
+    if (token && username) {
+        // لاگین شده
+        if (myFlightsBtn) myFlightsBtn.style.display = 'inline-block';
+        if (logoutBtnHome) logoutBtnHome.style.display = 'inline-block';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (registerBtn) registerBtn.style.display = 'none';
+
+        // خروج در صفحه اصلی
+        if (logoutBtnHome) {
+            logoutBtnHome.addEventListener('click', function() {
+                localStorage.clear();
+                window.location.href = '/';
+            });
+        }
+    } else {
+        // لاگین نشده
+        if (myFlightsBtn) myFlightsBtn.style.display = 'none';
+        if (logoutBtnHome) logoutBtnHome.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (registerBtn) registerBtn.style.display = 'inline-block';
+    }
+});
+</script>
+{% endblock %}
