@@ -1,12 +1,81 @@
 {% extends 'flights/base.html' %}
 
-{% block title %}ورود{% endblock %}
+{% block title %}ورود به سیستم{% endblock %}
 
 {% block content %}
-    <h1 class="text-center my-4">ورود به سیستم</h1>
-    <form method="post" class="w-50 mx-auto">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success w-100">ورود</button>
-    </form>
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                    <h3 class="mb-0">✈️ ورود به سیستم رزرو پرواز</h3>
+                </div>
+                <div class="card-body p-5">
+                    <form id="loginForm">
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-bold">نام کاربری</label>
+                            <input type="text" class="form-control form-control-lg" id="username" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold">رمز عبور</label>
+                            <input type="password" class="form-control form-control-lg" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            ورود
+                        </button>
+                    </form>
+
+                    <div id="message" class="mt-4 text-center fw-bold"></div>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted">
+                            حساب ندارید؟ <a href="/register/">ثبت‌نام کنید</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function login() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const messageDiv = document.getElementById('message');
+
+    if (!username || !password) {
+        messageDiv.innerHTML = '<div class="alert alert-warning">لطفاً همه فیلدها را پر کنید.</div>';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/token/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem('access_token', data.access);
+            localStorage.setItem('refresh_token', data.refresh);
+            localStorage.setItem('username', username);
+
+            messageDiv.innerHTML = '<div class="alert alert-success">✓ ورود موفق! در حال انتقال...</div>';
+            setTimeout(() => window.location.href = '/flights/', 1500);
+        } else {
+            messageDiv.innerHTML = '<div class="alert alert-danger">✗ نام کاربری یا رمز عبور اشتباه است.</div>';
+        }
+    } catch (error) {
+        messageDiv.innerHTML = '<div class="alert alert-danger">✗ خطا در ارتباط با سرور.</div>';
+    }
+}
+
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    login();
+});
+</script>
 {% endblock %}
