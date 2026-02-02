@@ -1,0 +1,25 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}جزئیات پرواز{% endblock %}
+
+{% block content %}
+<div class="card mx-auto w-75">
+    <div class="card-body">
+        <h3 class="card-title">{{ flight.name }}</h3>
+        <p><strong>مبدا:</strong> {{ flight.origin.name }} ({{ flight.origin.code }}) — <small>{{ flight.origin.city.name }}</small></p>
+        <p><strong>مقصد:</strong> {{ flight.destination.name }} ({{ flight.destination.code }}) — <small>{{ flight.destination.city.name }}</small></p>
+        <p><strong>فاصله:</strong> {{ flight.distance_km }} کیلومتر</p>
+        <p><strong>مسافران:</strong> {{ flight.passengers.count }}</p>
+
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'register_flight' flight.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">رزرو این پرواز</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary">ابتدا وارد شوید</a>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

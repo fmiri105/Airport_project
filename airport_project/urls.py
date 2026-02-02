@@ -1,11 +1,19 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import views as auth_views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
+from flights.auth_views import cookie_login_view, cookie_logout_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('flights.urls')),
-    path('login/', auth_views.LoginView.as_view( template_name='flights/login.html',
-    redirect_authenticated_user=True, next_page='flight_list'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='flight_list'), name='logout'),
+    path('login/', cookie_login_view, name='login'),
+    path('logout/', cookie_logout_view, name='logout'),
+
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]
