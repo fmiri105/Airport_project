@@ -3,10 +3,104 @@
 {% block title %}پروازهای من{% endblock %}
 
 {% block content %}
-    <h1 class="text-center my-4">پروازهای ثبت‌شده من</h1>
-    <ul class="list-group">
+<div class="container py-5">
+    <!-- هدر صفحه -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-12 col-lg-10 text-center">
+            <h1 class="display-5 fw-bold mb-3 text-primary">
+                <i class="fas fa-ticket-alt text-warning me-3"></i>
+                پروازهای ثبت‌شده من
+            </h1>
+            <p class="lead text-muted mb-4">
+                سفرهای رزرو شده شما در یک نگاه
+            </p>
+            
+            {% if flights %}
+                <div class="alert alert-info border-0 shadow-sm d-inline-block px-4 py-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    شما در <strong>{{ flights|length }}</strong> پرواز ثبت‌نام کرده‌اید
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- لیست پروازها -->
+    {% if flights %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for flight in flights %}
-            <li class="list-group-item">{{ flight }}</li>
+        <div class="col">
+            <div class="card h-100 border-0 shadow-lg hover-lift rounded-4 overflow-hidden">
+                <div class="card-body p-4 d-flex flex-column">
+                    <!-- نام پرواز -->
+                    <h5 class="card-title fw-bold text-primary mb-3">
+                        {{ flight.name }}
+                    </h5>
+
+                    <!-- مسیر پرواز -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-plane-departure fa-lg text-info me-3"></i>
+                            <div>
+                                <strong class="d-block">{{ flight.origin.name }} ({{ flight.origin.code }})</strong>
+                                <small class="text-muted">{{ flight.origin.city.name }}</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-plane-arrival fa-lg text-success me-3"></i>
+                            <div>
+                                <strong class="d-block">{{ flight.destination.name }} ({{ flight.destination.code }})</strong>
+                                <small class="text-muted">{{ flight.destination.city.name }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- فاصله و تعداد مسافر -->
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="badge bg-info-subtle text-info px-3 py-2">
+                            {{ flight.distance_km }} کیلومتر
+                        </span>
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                            <i class="fas fa-users me-1"></i>
+                            {{ flight.passengers.count }} مسافر
+                        </span>
+                    </div>
+
+                    <!-- دکمه‌های اقدام -->
+                    <div class="mt-auto">
+                        <a href="{% url 'flight_detail' flight.id %}" 
+                           class="btn btn-outline-primary w-100 mb-2">
+                            <i class="fas fa-eye me-2"></i>جزئیات پرواز
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
+    {% else %}
+    <!-- حالت خالی (هیچ پروازی ندارد) -->
+    <div class="text-center py-5 my-5 bg-light rounded-4 shadow-sm">
+        <i class="fas fa-ticket-alt fa-7x mb-4 text-muted opacity-50"></i>
+        <h3 class="text-muted mb-3">هنوز هیچ پروازی رزرو نکرده‌اید</h3>
+        <p class="lead text-muted mb-4">
+            پروازهای آینده‌تان را از لیست پروازها انتخاب کنید
+        </p>
+        <a href="{% url 'flight_list' %}" class="btn btn-primary btn-lg px-5">
+            <i class="fas fa-plane me-2"></i>مشاهده لیست پروازها
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- افکت hover کارت‌ها -->
+<style>
+    .hover-lift {
+        transition: all 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15) !important;
+    }
+</style>
 {% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}حذف پرواز{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4>آیا مطمئن هستید می‌خواهید «{{ flight.name }}» را حذف کنید؟</h4>
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">حذف</button>
+                    <a href="{% url 'flight_list' %}" class="btn btn-secondary ms-2">لغو</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

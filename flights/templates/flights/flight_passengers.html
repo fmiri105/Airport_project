@@ -1,0 +1,55 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}مسافران - {{ flight.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-users me-2"></i>
+                مسافران پرواز {{ flight.name }}
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-3">
+                <span class="badge bg-success fs-6">
+                    {{ passengers.count }} مسافر
+                </span>
+                <a href="{% url 'flight_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> بازگشت
+                </a>
+            </div>
+            
+            {% if passengers %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>نام</th>
+                            <th>پاسپورت</th>
+                            <th>تلفن</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for passenger in passengers %}
+                        <tr>
+                            <td><strong>{{ passenger.name }}</strong></td>
+                            <td><code>{{ passenger.passport }}</code></td>
+                            <td>{{ passenger.phone|default:"---" }}</td>
+                        </tr>
+                        {% empty %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">هیچ مسافری ثبت نشده</h5>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

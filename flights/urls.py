@@ -1,12 +1,15 @@
-# flights/urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     FlightViewSet, PassengerViewSet, UserRegisterView,
     CustomTokenObtainPairView,
-    flight_list_view, flight_detail_view, flight_join_view, my_flights_view, home_view
+    flight_list_view, flight_detail_view, flight_join_view,
+    my_flights_view, home_view,
+    flight_passengers_view, flight_create_view,
+    flight_edit_view, flight_delete_view
 )
+
 from .auth_views import register_view
 
 router = DefaultRouter()
@@ -21,6 +24,11 @@ urlpatterns = [
     path('register/', register_view, name='register'),
     path('flights/<int:pk>/', flight_detail_view, name='flight_detail'),
     path('flights/<int:pk>/register/', flight_join_view, name='register_flight'),
+    # manager/admin html routes
+    path('flights/add/', flight_create_view, name='flight_add'),
+    path('flights/<int:pk>/edit/', flight_edit_view, name='flight_edit'),
+    path('flights/<int:pk>/delete/', flight_delete_view, name='flight_delete'),
+    path('flights/<int:pk>/passengers/', flight_passengers_view, name='flight_passengers'),
     path('my_flights/', my_flights_view, name='my_flights'),
 
     # API routes under /api/
