@@ -29,19 +29,14 @@ from .forms import FlightForm
 # ───────────────────────────────────────────────
 # Helper Functions
 # ───────────────────────────────────────────────
-
 def _is_manager_or_admin(user):
-    """
-    Check if the user is a staff member (admin) or belongs to the 'Flight Managers' group.
+    is_staff = user.is_staff
+    is_super = user.is_superuser
+    in_group = user.groups.filter(name='Flight Managers').exists()
 
-    Args:
-        user: The user instance to check.
+    result = is_staff or is_super or in_group
 
-    Returns:
-        bool: True if user has management permissions, False otherwise.
-    """
-    return user.is_authenticated and (user.is_staff or user.groups.filter(name='Flight Managers').exists())
-
+    return result
 
 # ───────────────────────────────────────────────
 # JWT Token Views
@@ -193,6 +188,7 @@ def flight_detail_view(request, pk):
 
 
 @login_required
+@login_required
 def flight_join_view(request, pk):
     """
     Allow logged-in user to join a flight via HTML form (POST).
@@ -200,13 +196,26 @@ def flight_join_view(request, pk):
     """
     flight = get_object_or_404(Flight, pk=pk)
     
-    try:
-        passenger = request.user.passenger_profile
-    except Passenger.DoesNotExist:
-        messages.error(request, 'Passenger profile not found. Please register first.')
-        return redirect('register')
+    # 1. اگر کاربر مدیر است و فقط در حال مشاهده صفحه است (GET)، پیام مناسب را نشان دهید
+    if _is_manager_or_admin(request.user) and request.method == 'GET':
+        messages.info(request, 'You are a Manager/Admin. You can view passengers list on the detail page.')
+        # ریدایرکت نمی‌کنیم، اجازه می‌دهیم به رندر برود.
 
+    # 2. اگر کاربر مدیر است و در حال POST است، باید اجازه ثبت نام دهیم، 
+    # مگر اینکه منطق بیزینس شما اصرار بر جلوگیری از ثبت نام مدیر دارد.
+    # برای حل مشکل شما، شرط ریدایرکت فقط باید برای GET یا حالتی باشد که مدیر نباید دکمه Join را ببیند.
+    
     if request.method == 'POST':
+        # اگر مدیر است، اجازه می‌دهیم ادامه دهد تا پروفایل پیدا شود و اضافه شود.
+        # اگر می‌خواهید مدیر نتواند POST کند، باید این بخش را دوباره محدود کنید،
+        # اما چون کاربران گروهی کار می‌کنند، منطق زیر برای همه (به جز مدیران) کار می‌کند.
+
+        try:
+            passenger = request.user.passenger_profile
+        except Passenger.DoesNotExist:
+            messages.error(request, 'Passenger profile not found. Please register first.')
+            return redirect('register')
+
         if flight.passengers.filter(id=passenger.id).exists():
             messages.info(request, 'You already joined this flight.')
         else:
@@ -214,6 +223,7 @@ def flight_join_view(request, pk):
             messages.success(request, 'Successfully joined the flight!')
         return redirect('my_flights')
 
+    # 3. اگر درخواست GET است (چه مدیر و چه کاربر عادی)، فقط صفحه را رندر کن
     return render(request, 'flights/flight_detail.html', {'flight': flight})
 
 
@@ -247,16 +257,20 @@ def home_view(request):
 
 @user_passes_test(_is_manager_or_admin)
 def flight_create_view(request):
-    """
-    HTML view for creating a new flight.
-    Only accessible by Flight Managers or admins.
-    """
+    print(f"Method: {request.method} | User: {request.user} | Auth: {request.user.is_authenticated}")
+
     if request.method == 'POST':
+        print("POST دریافت شد → داده‌ها:", request.POST)
         form = FlightForm(request.POST)
         if form.is_valid():
-            form.save()
+            print("فرم معتبر است → ذخیره می‌شود")
+            flight = form.save()
+            print(f"پرواز جدید ذخیره شد → ID: {flight.id}")
             messages.success(request, 'Flight created successfully!')
             return redirect('flight_list')
+        else:
+            print("فرم نامعتبر است → خطاها:", form.errors)
+            messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
     else:
         form = FlightForm()
     
@@ -264,6 +278,8 @@ def flight_create_view(request):
         'form': form,
         'title': 'Add New Flight'
     })
+
+
 
 
 @user_passes_test(_is_manager_or_admin)
